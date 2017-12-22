@@ -47,7 +47,7 @@ class RedisAuth
         if (!$sessionFile = @$redis->get(config('cache.prefix', 'laravel') . ':' . $sessionName)) {
             return false;
         } else {
-            $object = @unserialize($sessionFile);
+            $object = @unserialize(unserialize($sessionFile));
             $userId = @$object['login_web_' . sha1(SessionGuard::class)];
             return $userId;
         }
