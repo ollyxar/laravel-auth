@@ -1,5 +1,6 @@
 <?php namespace Ollyxar\LaravelAuth;
 
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Auth\SessionGuard;
 
@@ -34,8 +35,13 @@ class FileAuth
 
         $cookie = urldecode($match[2]);
         $key = base64_decode(explode(':', env('APP_KEY'))[1]);
+        $serialized = true;
 
-        $sessionName = (new Encrypter($key, config('app.cipher')))->decrypt($cookie);
+        if (method_exists(EncryptCookies::class, 'serialized')) {
+            $serialized = EncryptCookies::serialized($cookieName);
+        }
+
+        $sessionName = (new Encrypter($key, config('app.cipher')))->decrypt($cookie, $serialized);
 
         if (!$sessionFile = @file_get_contents(config('session.files') . '/' . $sessionName)) {
             return false;
